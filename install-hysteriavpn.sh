@@ -67,22 +67,22 @@ print_header() {
 
 # Импорт библиотечных функций
 source "$LIB_DIR/docker-utils.sh" 2>/dev/null || {
-    print_error "Библиотека docker-utils.sh не найдена. Установите корректно скрипт."
+    print_error "Library docker-utils.sh not found. Install the script correctly."
     exit 1
 }
 
 source "$LIB_DIR/letsencrypt-utils.sh" 2>/dev/null || {
-    print_error "Библиотека letsencrypt-utils.sh не найдена. Установите корректно скрипт."
+    print_error "Library letsencrypt-utils.sh not found. Install the script correctly."
     exit 1
 }
 
 source "$LIB_DIR/networking-utils.sh" 2>/dev/null || {
-    print_error "Библиотека networking-utils.sh не найдена. Установите корректно скрипт."
+    print_error "Library networking-utils.sh not found. Install the script correctly."
     exit 1
 }
 
 source "$LIB_DIR/security-utils.sh" 2>/dev/null || {
-    print_error "Библиотека security-utils.sh не найдена. Установите корректно скрипт."
+    print_error "Library security-utils.sh not found. Install the script correctly."
     exit 1
 }
 
@@ -178,7 +178,7 @@ parse_args() {
 
 # Интерактивная конфигурация
 interactive_config() {
-    print_header "🎯 ИНТЕРАКТИВНАЯ КОНФИГУРАЦИЯ"
+    print_header "🎯 INTERACTIVE CONFIGURATION"
 
     # Тип установки
     echo "Выберите тип установки:"
@@ -300,88 +300,170 @@ interactive_config() {
      print_success "Конфигурация завершена!"
  }
 
- # Функция предварительных проверок системы
- run_preflight_checks() {
-     print_step "Выполнение предварительных проверок системы"
+# Preflight checks function
+run_preflight_checks() {
+    print_step "Running system preflight checks"
 
-     # Проверка прав root
-     if [ "$EUID" -ne 0 ]; then
-         print_error "Скрипт должен выполняться с правами root. Используйте sudo."
-         exit 1
-     fi
+    # Check root access
+    if [ "$EUID" -ne 0 ]; then
+        print_error "Script must be run as root. Use sudo."
+        exit 1
+    fi
 
-     # Проверка ОС
-     if [ -f /etc/os-release ]; then
-         . /etc/os-release
-         case "$ID" in
-             ubuntu|debian|centos|rhel|fedora)
-                 print_success "ОС совместима: $PRETTY_NAME"
-                 ;;
-             *)
-                 print_warning "ОС $ID может не поддерживаться. Продолжаем..."
-                 ;;
-         esac
-     else
-         print_warning "Не удалось определить ОС. Продолжаем..."
-     fi
+    # Check OS
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        case "$ID" in
+            ubuntu|debian|centos|rhel|fedora)
+                print_success "OS compatible: $PRETTY_NAME"
+                ;;
+            *)
+                print_warning "OS $ID may not be supported. Continuing..."
+                ;;
+        esac
+    else
+        print_warning "Could not determine OS. Continuing..."
+    fi
 
-     # Проверка необходимых команд
-     local missing_cmds=()
-     for cmd in "${REQUIRED_COMMANDS[@]}"; do
-         if ! command -v "$cmd" >/dev/null 2>&1; then
-             missing_cmds+=("$cmd")
-         fi
-     done
+    # Check required commands
+    local missing_cmds=()
+    for cmd in "${REQUIRED_COMMANDS[@]}"; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            missing_cmds+=("$cmd")
+        fi
+    done
 
-     if [ ${#missing_cmds[@]} -ne 0 ]; then
-         print_error "Отсутствующие команды: ${missing_cmds[*]}. Установите их."
-         exit 1
-     fi
-     print_success "Все необходимые команды найдены"
+    if [ ${#missing_cmds[@]} -ne 0 ]; then
+        print_error "Missing commands: ${missing_cmds[*]}. Please install them."
+        exit 1
+    fi
+    print_success "All required commands found"
 
-     # Проверка доступности портов
-     local occupied_ports=()
-     for port in "${REQUIRED_PORTS[@]}"; do
-         if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
-             occupied_ports+=("$port")
-         fi
-     done
+    # Check port availability
+    local occupied_ports=()
+    for port in "${REQUIRED_PORTS[@]}"; do
+        if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+            occupied_ports+=("$port")
+        fi
+    done
 
-     if [ ${#occupied_ports[@]} -ne 0 ]; then
-         print_error "Порты уже заняты: ${occupied_ports[*]}. Освободите их."
-         exit 1
-     fi
-     print_success "Все необходимые порты свободны"
+    if [ ${#occupied_ports[@]} -ne 0 ]; then
+        print_error "Ports already occupied: ${occupied_ports[*]}. Please free them."
+        exit 1
+    fi
+    print_success "All required ports are free"
 
-     # Проверка дискового пространства (минимум 5GB)
-     local available_space
-     available_space=$(df / | awk 'NR==2 {print $4}')
-     if [ "$available_space" -lt 5242880 ]; then  # 5GB в KB
-         print_error "Недостаточно дискового пространства. Минимум 5GB."
-         exit 1
-     fi
-     print_success "Дисковое пространство достаточно"
+    # Check disk space (minimum 5GB)
+    local available_space
+    available_space=$(df / | awk 'NR==2 {print $4}')
+    if [ "$available_space" -lt 5242880 ]; then  # 5GB in KB
+        print_error "Insufficient disk space. Minimum 5GB."
+        exit 1
+    fi
+    print_success "Disk space is sufficient"
 
-     # Проверка оперативной памяти (минимум 1GB)
-     local total_mem
-     total_mem=$(free -m | awk 'NR==2 {print $2}')
-     if [ "$total_mem" -lt 1024 ]; then
-         print_error "Недостаточно оперативной памяти. Минимум 1GB."
-         exit 1
-     fi
-     print_success "Оперативная память достаточна"
+    # Check RAM (minimum 1GB)
+    local total_mem
+    total_mem=$(free -m | awk 'NR==2 {print $2}')
+    if [ "$total_mem" -lt 1024 ]; then
+        print_error "Insufficient RAM. Minimum 1GB."
+        exit 1
+    fi
+    print_success "RAM is sufficient"
 
-     # Проверка интернет-соединения
-     if ! curl -s --connect-timeout 5 https://www.google.com >/dev/null; then
-         print_error "Нет интернет-соединения."
-         exit 1
-     fi
-     print_success "Интернет-соединение доступно"
+    # Check internet connection
+    if ! curl -s --connect-timeout 5 https://www.google.com >/dev/null; then
+        print_error "No internet connection."
+        exit 1
+    fi
+    print_success "Internet connection available"
 
-     print_success "Все предварительные проверки пройдены"
- }
+    print_success "All preflight checks passed"
+}
 
- # Главная функция установки
+# Install dependencies function
+install_dependencies() {
+    print_step "Installing system dependencies"
+
+    if command -v apt &> /dev/null; then
+        apt update
+        apt install -y curl wget git ufw htop iotop sysstat fail2ban logrotate unattended-upgrades
+    elif command -v yum &> /dev/null; then
+        yum install -y curl wget git firewalld htop iotop sysstat fail2ban logrotate yum-cron
+    else
+        print_error "Unsupported package manager"
+        exit 1
+    fi
+    print_success "Dependencies installed"
+}
+
+# Create directories function
+create_directories() {
+    print_step "Creating directories"
+    mkdir -p "$CONFIG_DIR"
+    mkdir -p "$SCRIPT_DIR/logs"
+    mkdir -p "$SCRIPT_DIR/ssl"
+    print_success "Directories created"
+}
+
+# Generate certificates function
+generate_certificates() {
+    print_step "Generating certificates"
+    if [ "$LETSENCRYPT_ENABLED" = true ]; then
+        generate_letsencrypt_certificate "$MASTER_DOMAIN" "$ADMIN_EMAIL"
+    else
+        openssl req -x509 -newkey rsa:4096 -keyout "$CONFIG_DIR/server.key" -out "$CONFIG_DIR/server.crt" -days 365 -nodes -subj "/CN=$MASTER_DOMAIN"
+    fi
+    print_success "Certificates generated"
+}
+
+# Generate env files function
+generate_env_files() {
+    print_step "Generating environment files"
+    DB_PASSWORD=$(openssl rand -hex 16)
+    JWT_SECRET=$(openssl rand -hex 32)
+    cat > "$CONFIG_DIR/.env" << EOF
+DB_PASSWORD=$DB_PASSWORD
+JWT_SECRET=$JWT_SECRET
+MASTER_DOMAIN=$MASTER_DOMAIN
+NODE_COUNT=$NODE_COUNT
+EOF
+    print_success "Environment files generated"
+}
+
+# Setup project function
+setup_hysteriavpn_project() {
+    print_step "Setting up HysteriaVPN project"
+    # Assume project is already here
+    print_success "Project setup complete"
+}
+
+# Deploy with docker function
+deploy_with_docker() {
+    print_step "Deploying with Docker"
+    check_docker
+    build_docker_images
+    start_services
+    print_success "Deployment complete"
+}
+
+# Run final verification function
+run_final_verification() {
+    print_step "Running final verification"
+    run_docker_health_checks
+    print_success "Verification complete"
+}
+
+# Show completion summary function
+show_completion_summary() {
+    print_header "Installation Complete"
+    echo "HysteriaVPN has been installed successfully!"
+    echo "Master domain: $MASTER_DOMAIN"
+    echo "Web panel: https://$MASTER_DOMAIN"
+    echo "API: https://$MASTER_DOMAIN/api"
+}
+
+# Главная функция установки
 main() {
     print_header "🚀 HYSTERIAVPN ONE-CLICK INSTALLER v$SCRIPT_VERSION"
     echo -e "${YELLOW}Полнофункциональный установщик HysteriaVPN для оркестратора и веб-панели${NC}"

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package node_management;
 
-option go_package = "hysteria2-microservices/proto";
+option go_package = "hysteria2_microservices/orchestrator-service/pkg/proto";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";

@@ -3,7 +3,8 @@ package interfaces
 import (
 	"time"
 
-	"hysteryVPN/orchestrator-service/internal/models"
+	"gorm.io/gorm"
+	"hysteria2_microservices/orchestrator-service/internal/models"
 )
 
 // NodeRepository defines operations for VPS node management
@@ -61,4 +62,10 @@ type UserRepository interface {
 	Delete(id string) error
 	List(offset, limit int) ([]*models.User, int64, error)
 	Search(query string, offset, limit int) ([]*models.User, int64, error)
+}
+
+// Database interface for database operations
+type Database interface {
+	*gorm.DB
+	AutoMigrate(dst ...interface{}) error
 }

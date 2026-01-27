@@ -3,15 +3,16 @@ package repositories
 import (
 	"time"
 
-	"hysteryVPN/orchestrator-service/internal/models"
-	"hysteryVPN/orchestrator-service/internal/repositories/interfaces"
+	"gorm.io/gorm"
+	"hysteria2_microservices/orchestrator-service/internal/models"
+	"hysteria2_microservices/orchestrator-service/internal/repositories/interfaces"
 )
 
 type NodeRepository struct {
-	db interfaces.Database
+	db *gorm.DB
 }
 
-func NewNodeRepository(db interfaces.Database) interfaces.NodeRepository {
+func NewNodeRepository(db *gorm.DB) interfaces.NodeRepository {
 	return &NodeRepository{db: db}
 }
 

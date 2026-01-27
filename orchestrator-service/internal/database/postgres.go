@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"hysteryVPN/orchestrator-service/internal/config"
+	"hysteria2_microservices/orchestrator-service/internal/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -17,7 +17,7 @@ type Database struct {
 }
 
 // NewDatabase creates a new database connection
-func NewDatabase(cfg *config.DatabaseConfig) (interfaces.Database, error) {
+func NewDatabase(cfg *config.DatabaseConfig) (*Database, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=UTC",
 		cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port, cfg.SSLMode)
 
@@ -52,13 +52,10 @@ func NewDatabase(cfg *config.DatabaseConfig) (interfaces.Database, error) {
 }
 
 // AutoMigrate runs database migrations
-func AutoMigrate(db interfaces.Database) error {
-	// Import models here to avoid circular imports
-	// We'll need to add the actual models import when we create them
+func AutoMigrate(db *Database, dst ...interface{}) error {
 	log.Println("Running database migrations...")
 
-	// This will be populated with actual models
-	err := db.AutoMigrate()
+	err := db.AutoMigrate(dst...)
 	if err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
@@ -68,8 +65,8 @@ func AutoMigrate(db interfaces.Database) error {
 }
 
 // Close closes the database connection
-func Close(db interfaces.Database) error {
-	sqlDB, err := db.(*Database).DB.DB()
+func Close(db *Database) error {
+	sqlDB, err := db.DB.DB()
 	if err != nil {
 		return fmt.Errorf("failed to get underlying SQL DB: %w", err)
 	}

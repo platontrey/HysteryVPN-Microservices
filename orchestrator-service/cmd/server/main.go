@@ -23,7 +23,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
-	pb "hysteria2_microservices/orchestrator-service/pkg/proto"
+	"hysteria2_microservices/orchestrator-service/pkg/proto"
 )
 
 func main() {
@@ -113,13 +113,13 @@ func setupLogger(cfg config.LoggingConfig) *logrus.Logger {
 	return logger
 }
 
-func setupRepositories(db database.Database) *repositories.Repositories {
+func setupRepositories(db *database.Database) *repositories.Repositories {
 	return &repositories.Repositories{
-		NodeRepo:       repositories.NewNodeRepository(db),
-		AssignmentRepo: repositories.NewNodeAssignmentRepository(db),
-		MetricRepo:     repositories.NewNodeMetricRepository(db),
-		DeploymentRepo: repositories.NewDeploymentRepository(db),
-		UserRepo:       repositories.NewUserRepository(db),
+		NodeRepo:       repositories.NewNodeRepository(db.DB),
+		AssignmentRepo: repositories.NewNodeAssignmentRepository(db.DB),
+		MetricRepo:     repositories.NewNodeMetricRepository(db.DB),
+		DeploymentRepo: repositories.NewDeploymentRepository(db.DB),
+		UserRepo:       repositories.NewUserRepository(db.DB),
 	}
 }
 

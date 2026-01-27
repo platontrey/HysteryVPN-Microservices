@@ -57,7 +57,8 @@ web-test: ## Test web service
 proto: ## Generate protobuf files
 	@echo "Generating protobuf files..."
 	@which protoc >/dev/null || (echo "protoc is not installed" && exit 1)
-	@protoc --go_out=. --go-grpc_out=. --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative proto/node_management.proto
+	@mkdir -p orchestrator-service/pkg/proto
+	@protoc --go_out=orchestrator-service/pkg/proto --go-grpc_out=orchestrator-service/pkg/proto --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative proto/node_management.proto
 	@echo "✅ Protobuf files generated"
 
 # Docker commands
