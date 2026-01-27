@@ -1,0 +1,677 @@
+syntax = "proto3";
+
+package node_management;
+
+option go_package = "hysteria2-microservices/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Message definitions for node management
+message Node {
+  string id = 1;
+  string name = 2;
+  string hostname = 3;
+  string ip_address = 4;
+  string location = 5;
+  string country = 6;
+  int32 grpc_port = 7;
+  string status = 8;
+  string version = 9;
+  map<string, string> capabilities = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp last_heartbeat = 12;
+  map<string, string> metadata = 13;
+}
+
+message RegisterNodeRequest {
+  string name = 1;
+  string hostname = 2;
+  string ip_address = 3;
+  string location = 4;
+  string country = 5;
+  int32 grpc_port = 6;
+  string version = 7;
+  map<string, string> capabilities = 8;
+  string auth_token = 9;
+  map<string, string> metadata = 10;
+}
+
+message RegisterNodeResponse {
+  bool success = 1;
+  string node_id = 2;
+  string message = 3;
+}
+
+message HeartbeatRequest {
+  string node_id = 1;
+  string status = 2;
+  map<string, double> metrics = 3;
+  google.protobuf.Timestamp timestamp = 4;
+}
+
+message HeartbeatResponse {
+  bool success = 1;
+  string message = 2;
+  map<string, string> commands = 3;
+}
+
+message ConfigUpdateRequest {
+  string node_id = 1;
+  string config_type = 2; // hysteria2, nginx, etc.
+  bytes config_data = 3;
+  string version = 4;
+}
+
+message ConfigUpdateResponse {
+  bool success = 1;
+  string message = 2;
+  string deployed_version = 3;
+}
+
+message ReloadRequest {
+  string node_id = 1;
+  string service_name = 2;
+}
+
+message ReloadResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message StatusRequest {
+  string node_id = 1;
+}
+
+message StatusResponse {
+  Node node = 1;
+  map<string, string> services_status = 2;
+  map<string, double> system_metrics = 3;
+}
+
+message AddUserRequest {
+  string node_id = 1;
+  string user_id = 2;
+  map<string, string> user_config = 3;
+}
+
+message AddUserResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RemoveUserRequest {
+  string node_id = 1;
+  string user_id = 2;
+}
+
+message RemoveUserResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UpdateUserRequest {
+  string node_id = 1;
+  string user_id = 2;
+  map<string, string> user_config = 3;
+}
+
+message UpdateUserResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message MetricsRequest {
+  string node_id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+}
+
+message MetricsResponse {
+  repeated MetricEvent metrics = 1;
+}
+
+message StreamMetricsRequest {
+  string node_id = 1;
+  int32 interval_seconds = 2;
+}
+
+message MetricEvent {
+  google.protobuf.Timestamp timestamp = 1;
+  map<string, double> values = 2;
+  map<string, string> labels = 3;
+}
+
+message RestartRequest {
+  string node_id = 1;
+  string service_name = 2;
+}
+
+message RestartResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message LogRequest {
+  string node_id = 1;
+  string service_name = 2;
+  int32 lines = 3;
+  string since = 4;
+}
+
+message LogResponse {
+  bool success = 1;
+  repeated string logs = 2;
+}
+
+message EnableMasqueradingRequest {
+  string node_id = 1;
+  string interface_name = 2;
+}
+
+message EnableMasqueradingResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DisableMasqueradingRequest {
+  string node_id = 1;
+  string interface_name = 2;
+}
+
+message DisableMasqueradingResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetNetworkInterfacesRequest {
+  string node_id = 1;
+}
+
+message GetNetworkInterfacesResponse {
+  repeated string interfaces = 1;
+  string default_interface = 2;
+}
+
+message IsMasqueradingEnabledRequest {
+  string node_id = 1;
+  string interface_name = 2;
+}
+
+message IsMasqueradingEnabledResponse {
+  bool enabled = 1;
+}
+
+message InstallHysteria2Request {
+  string node_id = 1;
+}
+
+message InstallHysteria2Response {
+  bool success = 1;
+  string message = 2;
+}
+
+message ConfigureHysteria2Request {
+  string node_id = 1;
+  string config_template = 2;
+  bool enable_port_hopping = 3;
+  int32 hop_start_port = 4;
+  int32 hop_end_port = 5;
+  int32 hop_interval = 6;
+  bool enable_salamander = 7;
+  string salamander_password = 8;
+}
+
+message ConfigureHysteria2Response {
+  bool success = 1;
+  string message = 2;
+  string config_path = 3;
+  string generated_config = 4;
+}
+
+message StartHysteria2Request {
+  string node_id = 1;
+  string config_path = 2;
+}
+
+message StartHysteria2Response {
+  bool success = 1;
+  string message = 2;
+}
+
+message StopHysteria2Request {
+  string node_id = 1;
+}
+
+message StopHysteria2Response {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetHysteria2StatusRequest {
+  string node_id = 1;
+}
+
+message GetHysteria2StatusResponse {
+  map<string, string> status = 1;
+}
+
+message EnablePortHoppingRequest {
+  string node_id = 1;
+  int32 start_port = 2;
+  int32 end_port = 3;
+  int32 interval = 4;
+}
+
+message EnablePortHoppingResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message EnableSalamanderRequest {
+  string node_id = 1;
+  string password = 2;
+}
+
+message EnableSalamanderResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Xray-related messages
+message InstallXrayRequest {
+  string node_id = 1;
+}
+
+message InstallXrayResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ConfigureXrayRequest {
+  string node_id = 1;
+  string protocol = 2; // "vless", "reality", "vmess", etc.
+  string config_template = 3; // JSON config template
+  bool enable_api = 4;
+  int32 listen_port = 5;
+}
+
+message ConfigureXrayResponse {
+  bool success = 1;
+  string message = 2;
+  string config_path = 3;
+  string generated_config = 4;
+}
+
+message StartXrayRequest {
+  string node_id = 1;
+  string config_path = 2;
+}
+
+message StartXrayResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message StopXrayRequest {
+  string node_id = 1;
+}
+
+message StopXrayResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetXrayStatusRequest {
+  string node_id = 1;
+}
+
+message GetXrayStatusResponse {
+  map<string, string> status = 1;
+}
+
+message ConfigureVLESSRequest {
+  string node_id = 1;
+  string uuid = 2;
+  string dest = 3;
+  string flow = 4; // optional: "xtls-rprx-vision"
+}
+
+message ConfigureVLESSResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ConfigureRealityRequest {
+  string node_id = 1;
+  string dest = 2;
+  string server_names = 3; // comma-separated
+  string private_key = 4;
+  repeated string short_ids = 5;
+}
+
+message ConfigureRealityResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GenerateRealityKeysRequest {
+  string node_id = 1;
+}
+
+message GenerateRealityKeysResponse {
+  bool success = 1;
+  string private_key = 2;
+  string public_key = 3;
+  string message = 4;
+}
+
+// WARP-related messages
+message WARPStatus {
+  bool installed = 1;
+  bool connected = 2;
+  string mode = 3;
+  int32 proxy_port = 4;
+  string account_type = 5;
+  string organization = 6;
+  string ip_address = 7;
+  string location = 8;
+  string server_location = 9;
+  int64 last_connected = 10;
+  int64 uptime = 11;
+  int64 bytes_sent = 12;
+  int64 bytes_received = 13;
+  string health = 14;
+  string error = 15;
+}
+
+message InstallWARPClientRequest {
+  string node_id = 1;
+}
+
+message InstallWARPClientResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ConfigureWARPRequest {
+  string node_id = 1;
+  bool enabled = 2;
+  int32 proxy_port = 3;
+  bool auto_connect = 4;
+  bool notify_on_fail = 5;
+  string client_type = 6;
+  string license_key = 7;
+  string organization = 8;
+  string mode = 9;
+}
+
+message ConfigureWARPResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ConnectWARPRequest {
+  string node_id = 1;
+}
+
+message ConnectWARPResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DisconnectWARPRequest {
+  string node_id = 1;
+}
+
+message DisconnectWARPResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetWARPStatusRequest {
+  string node_id = 1;
+}
+
+message GetWARPStatusResponse {
+  WARPStatus status = 1;
+}
+
+message EnableWARPProxyRequest {
+  string node_id = 1;
+  int32 port = 2;
+}
+
+message EnableWARPProxyResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DisableWARPProxyRequest {
+  string node_id = 1;
+}
+
+message DisableWARPProxyResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message EnableWARPTrafficRoutingRequest {
+  string node_id = 1;
+  string interface_name = 2;
+}
+
+message EnableWARPTrafficRoutingResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DisableWARPTrafficRoutingRequest {
+  string node_id = 1;
+}
+
+message DisableWARPTrafficRoutingResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Comprehensive WARP proxy management messages
+message WARPProxyStatus {
+  // WARP status
+  bool warp_installed = 1;
+  bool warp_connected = 2;
+  string warp_mode = 3;
+  int32 warp_proxy_port = 4;
+  string warp_account_type = 5;
+  string warp_organization = 6;
+  string warp_ip_address = 7;
+  string warp_location = 8;
+  string warp_server_location = 9;
+  int64 warp_last_connected = 10;
+  int64 warp_uptime = 11;
+  int64 warp_bytes_sent = 12;
+  int64 warp_bytes_received = 13;
+  string warp_health = 14;
+  string warp_error = 15;
+  
+  // Configuration
+  bool config_enabled = 16;
+  int32 config_proxy_port = 17;
+  bool config_auto_connect = 18;
+  bool config_notify_on_fail = 19;
+  string config_client_type = 20;
+  bool config_has_license = 21;
+  string config_organization = 22;
+  string config_mode = 23;
+  
+  // Network status
+  repeated string network_interfaces = 24;
+  map<string, bool> masquerading_status = 25;
+}
+
+message SetupWARPProxyEndpointRequest {
+  string node_id = 1;
+  
+  // WARP configuration
+  bool warp_enabled = 2;
+  int32 warp_proxy_port = 3;
+  bool auto_connect = 4;
+  bool notify_on_fail = 5;
+  string client_type = 6;
+  string license_key = 7;
+  string organization = 8;
+  
+  // VPN configuration
+  string vpn_interface = 9;
+  int32 vpn_listen_port = 10;
+  string vpn_auth_password = 11;
+  int32 bandwidth_up = 12;
+  int32 bandwidth_down = 13;
+  
+  // Options
+  bool configure_hysteria = 14;
+  bool setup_traffic_routing = 15;
+  bool enable_masquerading = 16;
+}
+
+message SetupWARPProxyEndpointResponse {
+  bool success = 1;
+  string message = 2;
+  map<string, string> config = 3;
+}
+
+message GetWARPProxyStatusRequest {
+  string node_id = 1;
+}
+
+message GetWARPProxyStatusResponse {
+  WARPProxyStatus status = 1;
+}
+
+message RestartWARPProxyServiceRequest {
+  string node_id = 1;
+}
+
+message RestartWARPProxyServiceResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message TestWARPProxyConnectivityRequest {
+  string node_id = 1;
+}
+
+message TestWARPProxyConnectivityResponse {
+  bool success = 1;
+  map<string, bool> results = 2;
+  string message = 3;
+}
+
+message ReportMetricsRequest {
+  string node_id = 1;
+  repeated MetricEvent metrics = 2;
+}
+
+message ReportMetricsResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message EventReportRequest {
+  string node_id = 1;
+  string event_type = 2;
+  string severity = 3;
+  string message = 4;
+  map<string, string> details = 5;
+  google.protobuf.Timestamp timestamp = 6;
+}
+
+message EventReportResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListNodesRequest {
+  string status_filter = 1;
+  string location_filter = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message ListNodesResponse {
+  repeated Node nodes = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// Services definitions
+
+// Node Manager - Master calls to Nodes
+service NodeManager {
+  rpc UpdateConfig(ConfigUpdateRequest) returns (ConfigUpdateResponse);
+  rpc ReloadConfig(ReloadRequest) returns (ReloadResponse);
+  rpc GetStatus(StatusRequest) returns (StatusResponse);
+  rpc AddUser(AddUserRequest) returns (AddUserResponse);
+  rpc RemoveUser(RemoveUserRequest) returns (RemoveUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc GetMetrics(MetricsRequest) returns (MetricsResponse);
+  rpc StreamMetrics(StreamMetricsRequest) returns (stream MetricEvent);
+  rpc RestartServer(RestartRequest) returns (RestartResponse);
+  rpc GetLogs(LogRequest) returns (LogResponse);
+  rpc EnableMasquerading(EnableMasqueradingRequest) returns (EnableMasqueradingResponse);
+  rpc DisableMasquerading(DisableMasqueradingRequest) returns (DisableMasqueradingResponse);
+  rpc GetNetworkInterfaces(GetNetworkInterfacesRequest) returns (GetNetworkInterfacesResponse);
+  rpc IsMasqueradingEnabled(IsMasqueradingEnabledRequest) returns (IsMasqueradingEnabledResponse);
+  rpc InstallHysteria2(InstallHysteria2Request) returns (InstallHysteria2Response);
+  rpc ConfigureHysteria2(ConfigureHysteria2Request) returns (ConfigureHysteria2Response);
+  rpc StartHysteria2(StartHysteria2Request) returns (StartHysteria2Response);
+  rpc StopHysteria2(StopHysteria2Request) returns (StopHysteria2Response);
+  rpc GetHysteria2Status(GetHysteria2StatusRequest) returns (GetHysteria2StatusResponse);
+  rpc EnablePortHopping(EnablePortHoppingRequest) returns (EnablePortHoppingResponse);
+  rpc EnableSalamander(EnableSalamanderRequest) returns (EnableSalamanderResponse);
+
+  // Xray management methods
+  rpc InstallXray(InstallXrayRequest) returns (InstallXrayResponse);
+  rpc ConfigureXray(ConfigureXrayRequest) returns (ConfigureXrayResponse);
+  rpc StartXray(StartXrayRequest) returns (StartXrayResponse);
+  rpc StopXray(StopXrayRequest) returns (StopXrayResponse);
+  rpc GetXrayStatus(GetXrayStatusRequest) returns (GetXrayStatusResponse);
+  rpc ConfigureVLESS(ConfigureVLESSRequest) returns (ConfigureVLESSResponse);
+  rpc ConfigureReality(ConfigureRealityRequest) returns (ConfigureRealityResponse);
+  rpc GenerateRealityKeys(GenerateRealityKeysRequest) returns (GenerateRealityKeysResponse);
+  
+  // WARP management methods
+  rpc InstallWARPClient(InstallWARPClientRequest) returns (InstallWARPClientResponse);
+  rpc ConfigureWARP(ConfigureWARPRequest) returns (ConfigureWARPResponse);
+  rpc ConnectWARP(ConnectWARPRequest) returns (ConnectWARPResponse);
+  rpc DisconnectWARP(DisconnectWARPRequest) returns (DisconnectWARPResponse);
+  rpc GetWARPStatus(GetWARPStatusRequest) returns (GetWARPStatusResponse);
+  rpc EnableWARPProxy(EnableWARPProxyRequest) returns (EnableWARPProxyResponse);
+  rpc DisableWARPProxy(DisableWARPProxyRequest) returns (DisableWARPProxyResponse);
+  rpc EnableWARPTrafficRouting(EnableWARPTrafficRoutingRequest) returns (EnableWARPTrafficRoutingResponse);
+  rpc DisableWARPTrafficRouting(DisableWARPTrafficRoutingRequest) returns (DisableWARPTrafficRoutingResponse);
+  
+  // Comprehensive WARP proxy management
+  rpc SetupWARPProxyEndpoint(SetupWARPProxyEndpointRequest) returns (SetupWARPProxyEndpointResponse);
+  rpc GetWARPProxyStatus(GetWARPProxyStatusRequest) returns (GetWARPProxyStatusResponse);
+  rpc RestartWARPProxyService(RestartWARPProxyServiceRequest) returns (RestartWARPProxyServiceResponse);
+  rpc TestWARPProxyConnectivity(TestWARPProxyConnectivityRequest) returns (TestWARPProxyConnectivityResponse);
+}
+
+// Master Service - Nodes call to Master
+service MasterService {
+  rpc RegisterNode(RegisterNodeRequest) returns (RegisterNodeResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc ReportMetrics(ReportMetricsRequest) returns (ReportMetricsResponse);
+  rpc ReportEvent(EventReportRequest) returns (EventReportResponse);
+}
+
+// Admin Service - Web UI calls to Master
+service AdminService {
+  rpc ListNodes(ListNodesRequest) returns (ListNodesResponse);
+  rpc GetNode(StatusRequest) returns (StatusResponse);
+  rpc UpdateNodeConfig(ConfigUpdateRequest) returns (ConfigUpdateResponse);
+  rpc RestartNode(RestartRequest) returns (RestartResponse);
+  rpc GetNodeLogs(LogRequest) returns (LogResponse);
+}

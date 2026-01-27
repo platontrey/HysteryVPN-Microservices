@@ -1,0 +1,84 @@
+listen: :443
+
+# SNI Configuration - Support multiple domains
+sni:
+  enabled: true
+  default: "primary.example.com"
+  domains:
+    - domain: "primary.example.com"
+      cert: "/etc/hysteria/sni/primary.example.com.crt"
+      key: "/etc/hysteria/sni/primary.example.com.key"
+    - domain: "backup.example.com"
+      cert: "/etc/hysteria/sni/backup.example.com.crt"
+      key: "/etc/hysteria/sni/backup.example.com.key"
+    - domain: "stealth.example.com"
+      cert: "/etc/hysteria/sni/stealth.example.com.crt"
+      key: "/etc/hysteria/sni/stealth.example.com.key"
+
+# Fallback TLS configuration (used when SNI is not available or for compatibility)
+tls:
+  cert: /etc/hysteria/server.crt
+  key: /etc/hysteria/server.key
+
+# Authentication - will be managed by API
+auth:
+  type: password
+  password: "default_password_change_via_api"
+
+# Bandwidth limits
+bandwidth:
+  up: "500 mbps"
+  down: "1 gbps"
+
+# === MUTUALLY EXCLUSIVE OPTIONS ===
+# Choose ONLY ONE of the following:
+
+# Option 1: Masquerade (default) - Traffic appears as normal HTTPS
+# Comment this out if using obfuscation
+masquerade:
+  type: proxy
+  proxy:
+    url: https://www.google.com
+    rewriteHost: true
+
+# Option 2: Obfuscation - Traffic is obfuscated with Salamander
+# Uncomment this and comment out masquerade above for obfuscation
+# obfs:
+#   type: salamander
+#   password: "your_obfuscation_password_here"
+
+# Access control
+acl:
+  file: /etc/hysteria/acl.txt
+  geoip: /etc/hysteria/geoip.dat
+
+# Traffic statistics API
+trafficStats:
+  listen: :9999
+  secret: "hysteria_stats_secret"
+
+# QUIC configuration
+quic:
+  initStreamReceiveWindow: 8388608
+  maxStreamReceiveWindow: 8388608
+  initConnReceiveWindow: 20971520
+  maxConnReceiveWindow: 20971520
+  maxIdleTimeout: 30s
+  maxUdpReceiveQueueSize: 1024
+  disablePathMTUDiscovery: false
+
+# Outbound configuration
+outbound:
+  name: direct
+
+# Disable UDP if not needed
+udpDisabled: false
+
+# Connection limits
+maxIncomingStreams: 1000
+
+# Optional: SNI-specific logging
+logging:
+  level: info
+  fields:
+    service: hysteria2-sni

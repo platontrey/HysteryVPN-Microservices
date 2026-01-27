@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .messages {
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .sent { background-color: #e3f2fd; }
+        .received { background-color: #f3e5f5; }
+        .error { background-color: #ffebee; color: #c62828; }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { opacity: 0.8; }
+        .connect { background-color: #4caf50; color: white; }
+        .disconnect { background-color: #f44336; color: white; }
+        .send { background-color: #2196f3; color: white; }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hysteria2 WebSocket Test</h1>
+
+    <div class="status disconnected" id="status">
+        Disconnected
+    </div>
+
+    <div>
+        <input type="text" id="token" placeholder="JWT Token" style="width: 400px;">
+        <button class="connect" onclick="connect()">Connect</button>
+        <button class="disconnect" onclick="disconnect()">Disconnect</button>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <button class="send" onclick="sendPing()">Send Ping</button>
+        <button class="send" onclick="subscribeTraffic()">Subscribe to Traffic</button>
+        <button class="send" onclick="sendCustom()">Send Custom Message</button>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <script>
+        let ws = null;
+
+        function addMessage(text, type = 'info') {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function updateStatus(text, connected = false) {
+            const status = document.getElementById('status');
+            status.textContent = text;
+            status.className = connected ? 'status connected' : 'status disconnected';
+        }
+
+        function connect() {
+            const token = document.getElementById('token').value;
+            if (!token) {
+                addMessage('Please enter JWT token', 'error');
+                return;
+            }
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                addMessage('Already connected', 'error');
+                return;
+            }
+
+            try {
+                ws = new WebSocket(`ws://localhost:8080/ws?token=${encodeURIComponent(token)}`);
+
+                ws.onopen = () => {
+                    updateStatus('Connected', true);
+                    addMessage('WebSocket connected successfully', 'received');
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const message = JSON.parse(event.data);
+                        addMessage(`Received: ${JSON.stringify(message, null, 2)}`, 'received');
+                    } catch (e) {
+                        addMessage(`Received: ${event.data}`, 'received');
+                    }
+                };
+
+                ws.onclose = (event) => {
+                    updateStatus('Disconnected', false);
+                    addMessage(`WebSocket closed: ${event.code} ${event.reason}`, 'error');
+                    ws = null;
+                };
+
+                ws.onerror = (error) => {
+                    addMessage(`WebSocket error: ${error}`, 'error');
+                    updateStatus('Error', false);
+                };
+
+            } catch (error) {
+                addMessage(`Connection error: ${error}`, 'error');
+                updateStatus('Error', false);
+            }
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close(1000, 'Client disconnect');
+            } else {
+                addMessage('Not connected', 'error');
+            }
+        }
+
+        function sendPing() {
+            sendMessage({ type: 'ping' });
+        }
+
+        function subscribeTraffic() {
+            sendMessage({ type: 'subscribe_traffic' });
+        }
+
+        function sendCustom() {
+            const customMessage = prompt('Enter custom message (JSON):', '{"type": "ping"}');
+            if (customMessage) {
+                try {
+                    const message = JSON.parse(customMessage);
+                    sendMessage(message);
+                } catch (e) {
+                    addMessage(`Invalid JSON: ${e}`, 'error');
+                }
+            }
+        }
+
+        function sendMessage(message) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const messageStr = JSON.stringify(message);
+                ws.send(messageStr);
+                addMessage(`Sent: ${messageStr}`, 'sent');
+            } else {
+                addMessage('Not connected - cannot send message', 'error');
+            }
+        }
+
+        // Auto-fill token from localStorage if available
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                document.getElementById('token').value = token;
+            }
+        });
+    </script>
+</body>
+</html>
