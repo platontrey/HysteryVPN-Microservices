@@ -3,7 +3,6 @@ package interfaces
 import (
 	"time"
 
-	"gorm.io/gorm"
 	"hysteria2_microservices/orchestrator-service/internal/models"
 )
 
@@ -62,10 +61,4 @@ type UserRepository interface {
 	Delete(id string) error
 	List(offset, limit int) ([]*models.User, int64, error)
 	Search(query string, offset, limit int) ([]*models.User, int64, error)
-}
-
-// Database interface for database operations
-type Database interface {
-	*gorm.DB
-	AutoMigrate(dst ...interface{}) error
 }
