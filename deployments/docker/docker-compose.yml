@@ -41,7 +41,7 @@ services:
   # Orchestrator Service (Master Server)
   orchestrator-service:
     build:
-      context: ../orchestrator-service
+      context: ../../orchestrator-service
       dockerfile: Dockerfile
     container_name: hysteria2-orchestrator
     ports:
@@ -76,7 +76,7 @@ services:
 
   api-service:
     build:
-      context: ../api-service
+      context: ../../api-service
       dockerfile: Dockerfile
     container_name: hysteria2-api
     ports:
@@ -109,7 +109,7 @@ services:
 
   web-service:
     build:
-      context: ../web-service
+      context: ../../web-service
       dockerfile: Dockerfile
     container_name: hysteria2-web
     ports:
