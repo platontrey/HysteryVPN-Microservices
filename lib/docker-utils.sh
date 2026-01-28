@@ -10,10 +10,10 @@ check_docker() {
         install_docker
     fi
 
-    if ! systemctl is-active --quiet docker; then
-        print_warning "Docker service not running. Starting..."
-        systemctl start docker
-        systemctl enable docker
+    # Check if running (works for both native and Docker Desktop)
+    if ! docker info &> /dev/null; then
+        print_error "Docker daemon is not running. If using WSL, start Docker Desktop in Windows."
+        exit 1
     fi
 
     print_success "Docker is ready"
