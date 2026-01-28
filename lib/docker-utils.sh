@@ -59,13 +59,11 @@ install_docker() {
 
 # Install Docker Compose
 install_docker_compose() {
-    if ! command -v docker-compose &> /dev/null; then
-        print_warning "Installing Docker Compose..."
-        curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        chmod +x /usr/local/bin/docker-compose
-        print_success "Docker Compose installed"
+    if ! docker compose version &> /dev/null; then
+        print_error "Docker Compose plugin not found. Please install Docker Desktop or enable the Compose plugin."
+        exit 1
     else
-        print_success "Docker Compose already installed"
+        print_success "Docker Compose plugin available"
     fi
 }
 
@@ -73,12 +71,15 @@ install_docker_compose() {
 build_docker_images() {
     print_step "Building Docker images"
 
+    # Ensure Docker Compose is installed
+    install_docker_compose
+
     cd "$SCRIPT_DIR/deployments/docker" || {
         print_error "Docker directory not found"
         exit 1
     }
 
-    docker-compose build --parallel
+    docker compose build
     print_success "Docker images built"
 }
 
@@ -92,25 +93,25 @@ start_services() {
     }
 
     # Start infrastructure first
-    docker-compose up -d postgres redis
+    docker compose up -d postgres redis
 
     # Wait for databases
     print_info "Waiting for databases to initialize..."
     sleep 15
 
     # Start application services
-    docker-compose up -d orchestrator-service api-service web-service
+    docker compose up -d orchestrator-service api-service web-service
 
     # Start nodes if configured
     if [[ "$NODE_COUNT" -gt 0 ]]; then
         for ((i=1; i<=NODE_COUNT; i++)); do
-            docker-compose up -d "agent-node-$i"
+            docker compose up -d "agent-node-$i"
         done
     fi
 
     # Start monitoring if enabled
     if [[ "$MONITORING_ENABLED" == true ]]; then
-        docker-compose up -d prometheus grafana node-exporter alertmanager
+        docker compose up -d prometheus grafana node-exporter alertmanager
     fi
 
     print_success "All services started"
@@ -125,7 +126,7 @@ run_docker_health_checks() {
     local services=("postgres" "redis" "orchestrator-service" "api-service" "web-service")
 
     for service in "${services[@]}"; do
-        if docker-compose ps "$service" | grep -q "Up"; then
+        if docker compose ps "$service" | grep -q "Up"; then
             print_success "$service is running"
         else
             print_error "$service failed to start"
@@ -153,7 +154,7 @@ stop_services() {
 
     cd "$SCRIPT_DIR/deployments/docker" || return 1
 
-    docker-compose down
+    docker compose down
     print_success "Services stopped"
 }
 

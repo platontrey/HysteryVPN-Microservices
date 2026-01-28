@@ -97,7 +97,7 @@ if certbot renew --quiet --post-hook "systemctl reload nginx"; then
     echo "$(date): Certificate renewal successful" >> $LOG_FILE
     
     # Restart HysteriaVPN services to reload certificates
-    docker-compose -f /opt/hysteriavpn/docker-compose.yml restart 2>/dev/null || true
+    docker compose -f /opt/hysteriavpn/docker compose.yml restart 2>/dev/null || true
 else
     echo "$(date): Certificate renewal failed" >> $LOG_FILE
 fi

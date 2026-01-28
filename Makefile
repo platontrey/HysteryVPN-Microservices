@@ -63,7 +63,7 @@ proto: ## Generate protobuf files
 
 # Docker commands
 docker-build: ## Build all Docker images
-	docker-compose -f deployments/docker/docker-compose.yml build
+	docker compose -f deployments/docker/docker-compose.yml build
 
 docker-run: ## Run all services with Docker Compose
 	docker-compose -f deployments/docker/docker-compose.yml up -d

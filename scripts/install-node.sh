@@ -119,8 +119,8 @@ install_docker() {
     systemctl start docker
 
     # Install Docker Compose
-    curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
+    curl -L "https://github.com/docker/compose/releases/download/v2.29.1/docker compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker compose
+    chmod +x /usr/local/bin/docker compose
 
     log "Docker and Docker Compose installed"
 }
@@ -185,8 +185,8 @@ generate_node_config() {
     # Generate random auth password
     AUTH_PASSWORD=$(openssl rand -base64 16)
 
-    # Create docker-compose.yml for node
-    cat > "$INSTALL_DIR/docker-compose.yml" << EOF
+    # Create docker compose.yml for node
+    cat > "$INSTALL_DIR/docker compose.yml" << EOF
 version: '3.8'
 
 services:
@@ -336,7 +336,7 @@ $INSTALL_DIR/logs/*.log {
     notifempty
     create 0644 root root
     postrotate
-        docker-compose -f $INSTALL_DIR/docker-compose.yml logs -f --tail=0 > /dev/null 2>&1 || true
+        docker compose -f $INSTALL_DIR/docker compose.yml logs -f --tail=0 > /dev/null 2>&1 || true
     endscript
 }
 EOF
@@ -350,7 +350,7 @@ echo "Uptime: \$(uptime -p)"
 echo "Load: \$(uptime | awk -F'load average:' '{ print \$2 }')"
 echo ""
 echo "=== Docker Status ==="
-docker-compose -f "$INSTALL_DIR/docker-compose.yml" ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+docker compose -f "$INSTALL_DIR/docker compose.yml" ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 echo ""
 echo "=== Hysteria2 Connections ==="
 ss -uln | grep :$LISTEN_PORT || echo "No active connections"
@@ -417,13 +417,13 @@ start_node() {
     log "Starting Hysteria2 node..."
 
     cd "$INSTALL_DIR"
-    docker-compose up -d
+    docker compose up -d
 
     log "Waiting for node to start..."
     sleep 10
 
     # Check if container is running
-    if docker-compose ps | grep -q "Up"; then
+    if docker compose ps | grep -q "Up"; then
         log "Node started successfully"
     else
         error "Failed to start node"
@@ -481,9 +481,9 @@ show_completion() {
     fi
     echo ""
     info "Management Commands:"
-    echo "  Start:  cd $INSTALL_DIR && docker-compose up -d"
-    echo "  Stop:   cd $INSTALL_DIR && docker-compose down"
-    echo "  Logs:   cd $INSTALL_DIR && docker-compose logs -f"
+    echo "  Start:  cd $INSTALL_DIR && docker compose up -d"
+    echo "  Stop:   cd $INSTALL_DIR && docker compose down"
+    echo "  Logs:   cd $INSTALL_DIR && docker compose logs -f"
     echo "  Status: $INSTALL_DIR/monitor.sh"
     echo ""
     warning "Next Steps:"

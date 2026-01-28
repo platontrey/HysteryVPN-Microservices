@@ -155,19 +155,19 @@ chmod +x install-hysteriavpn.sh
 ### Docker команды:
 ```bash
 # Просмотр состояния
-docker-compose -f docker-compose.generated.yml ps
+docker compose -f docker compose.generated.yml ps
 
 # Просмотр логов
-docker-compose -f docker-compose.generated.yml logs -f [service-name]
+docker compose -f docker compose.generated.yml logs -f [service-name]
 
 # Остановить все
-docker-compose -f docker-compose.generated.yml down
+docker compose -f docker compose.generated.yml down
 
 # Запустить все
-docker-compose -f docker-compose.generated.yml up -d
+docker compose -f docker compose.generated.yml up -d
 
 # Рестарт конкретного сервиса
-docker-compose -f docker-compose.generated.yml restart api-service
+docker compose -f docker compose.generated.yml restart api-service
 ```
 
 ### Бэкапы:
@@ -182,10 +182,10 @@ cat backup.sql | docker exec -i hysteria2-postgres psql -U hysteria2 -d hysteria
 ### Масштабирование nodes:
 ```bash
 # Запустить дополнительный agent
-docker-compose -f docker-compose.generated.yml up -d agent-node-4
+docker compose -f docker compose.generated.yml up -d agent-node-4
 
 # Рассмотреть все agents
-docker-compose -f docker-compose.generated.yml scale agent-node=5
+docker compose -f docker compose.generated.yml scale agent-node=5
 ```
 
 ## 📊 Мониторинг и алерты
@@ -258,13 +258,13 @@ sudo systemctl enable docker
 #### 4. Сервисы не запускаются:
 ```bash
 # Проверить логи
-docker-compose -f docker-compose.generated.yml logs
+docker compose -f docker compose.generated.yml logs
 
 # Проверить ресурсы
 docker system df
 
 # Restart один сервис
-docker-compose -f docker-compose.generated.yml restart orchestrator-service
+docker compose -f docker compose.generated.yml restart orchestrator-service
 ```
 
 ## 📞 Техническая поддержка

@@ -138,7 +138,7 @@ setup_logrotate() {
     notifempty
     copytruncate
     postrotate
-        docker-compose -f /opt/hysteriavpn/docker-compose.yml logs > /dev/null 2>&1 || true
+        docker compose -f /opt/hysteriavpn/docker compose.yml logs > /dev/null 2>&1 || true
     endscript
 }
 EOF

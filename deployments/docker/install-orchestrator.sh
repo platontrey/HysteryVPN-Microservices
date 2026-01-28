@@ -30,15 +30,15 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Install Docker Compose if not present
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+if ! command -v docker compose &> /dev/null && ! docker compose version &> /dev/null; then
     echo "🐳 Installing Docker Compose..."
     if command -v apt-get &> /dev/null; then
         sudo apt-get update
-        sudo apt-get install -y docker-compose
+        sudo apt-get install -y docker compose
     elif command -v yum &> /dev/null; then
-        sudo yum install -y docker-compose
+        sudo yum install -y docker compose
     elif command -v dnf &> /dev/null; then
-        sudo dnf install -y docker-compose
+        sudo dnf install -y docker compose
     else
         echo "❌ Could not install Docker Compose automatically. Please install manually."
         exit 1
@@ -110,12 +110,12 @@ EOF
 
 echo ""
 echo "🚀 Starting orchestrator services..."
-docker-compose up -d postgres redis orchestrator-service api-service web-service
+docker compose up -d postgres redis orchestrator-service api-service web-service
 
 echo "⏳ Waiting for services..."
 sleep 30
 
-if docker-compose ps postgres redis orchestrator-service api-service web-service | grep -q "Up"; then
+if docker compose ps postgres redis orchestrator-service api-service web-service | grep -q "Up"; then
     echo ""
     echo "✅ Orchestrator installed successfully!"
     echo "🌐 Web Interface: http://${SERVER_HOST}:3000"
@@ -127,9 +127,9 @@ if docker-compose ps postgres redis orchestrator-service api-service web-service
     echo "   JWT Secret: ${JWT_SECRET}"
     echo "   Node Auth Token: ${NODE_AUTH_TOKEN}"
     echo ""
-    echo "🔍 Logs: docker-compose logs -f"
-    echo "🛑 Stop: docker-compose down"
+    echo "🔍 Logs: docker compose logs -f"
+    echo "🛑 Stop: docker compose down"
 else
-    echo "❌ Installation failed. Check logs: docker-compose logs"
+    echo "❌ Installation failed. Check logs: docker compose logs"
     exit 1
 fi

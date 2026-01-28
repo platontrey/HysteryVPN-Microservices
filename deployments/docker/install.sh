@@ -17,7 +17,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
+if ! command -v docker compose &> /dev/null && ! docker compose version &> /dev/null; then
     echo "❌ Docker Compose is not installed. Please install Docker Compose first."
     echo "   Visit: https://docs.docker.com/compose/install/"
     exit 1
@@ -27,8 +27,8 @@ echo "✅ Docker and Docker Compose are installed"
 echo ""
 
 # Check if we're in the right directory
-if [ ! -f "docker-compose.yml" ]; then
-    echo "❌ docker-compose.yml not found. Please run this script from the deployments/docker directory"
+if [ ! -f "docker compose.yml" ]; then
+    echo "❌ docker compose.yml not found. Please run this script from the deployments/docker directory"
     exit 1
 fi
 
@@ -111,13 +111,13 @@ REACT_APP_ORCHESTRATOR_URL=http://${SERVER_HOST}:8081
 EOF
 
 echo "🔄 Pulling Docker images..."
-docker-compose pull
+docker compose pull
 
 echo "🏗️ Building services..."
-docker-compose build --parallel
+docker compose build
 
 echo "🚀 Starting core services..."
-docker-compose up -d postgres redis orchestrator-service api-service web-service
+docker compose up -d postgres redis orchestrator-service api-service web-service
 
 echo "⏳ Waiting for core services to be healthy..."
 sleep 30
@@ -126,19 +126,19 @@ sleep 30
 if [ "$NUM_NODES" -gt 0 ]; then
     echo "🚀 Starting $NUM_NODES example nodes..."
     if [ "$NUM_NODES" -ge 1 ]; then
-        docker-compose up -d agent-us-east
+        docker compose up -d agent-us-east
     fi
     if [ "$NUM_NODES" -ge 2 ]; then
-        docker-compose up -d agent-europe
+        docker compose up -d agent-europe
     fi
     if [ "$NUM_NODES" -ge 3 ]; then
-        docker-compose up -d agent-asia
+        docker compose up -d agent-asia
     fi
     sleep 10
 fi
 
 # Check if services are running
-if docker-compose ps | grep -q "Up"; then
+if docker compose ps | grep -q "Up"; then
     echo "✅ Installation completed successfully!"
     echo ""
     echo "🌐 Access URLs:"
@@ -159,9 +159,9 @@ if docker-compose ps | grep -q "Up"; then
     echo "   3. Deploy additional agents on VPS servers"
     echo "   4. Test VPN connections with the HysteryVPN client"
     echo ""
-    echo "🔍 Check logs: docker-compose logs -f [service-name]"
-    echo "🛑 Stop: docker-compose down"
+    echo "🔍 Check logs: docker compose logs -f [service-name]"
+    echo "🛑 Stop: docker compose down"
 else
-    echo "❌ Some services failed to start. Check logs with: docker-compose logs"
+    echo "❌ Some services failed to start. Check logs with: docker compose logs"
     exit 1
 fi

@@ -88,8 +88,8 @@ sudo systemctl start docker
 
 3. **Install Docker Compose:**
 ```bash
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.29.1/docker compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker compose
+sudo chmod +x /usr/local/bin/docker compose
 ```
 
 4. **Clone repository:**
@@ -163,8 +163,8 @@ sudo ufw --force enable
 sudo mkdir -p /opt/hysteria2-node
 cd /opt/hysteria2-node
 
-# Create docker-compose.yml
-sudo tee docker-compose.yml > /dev/null <<EOF
+# Create docker compose.yml
+sudo tee docker compose.yml > /dev/null <<EOF
 version: '3.8'
 services:
   hysteria-agent:
@@ -184,7 +184,7 @@ EOF
 
 6. **Start node:**
 ```bash
-sudo docker-compose up -d
+sudo docker compose up -d
 ```
 
 ## Configuration
@@ -233,8 +233,8 @@ make db-backup       # Backup database
 
 # Node commands
 cd /opt/hysteria2-node
-docker-compose logs -f    # View logs
-docker-compose restart    # Restart services
+docker compose logs -f    # View logs
+docker compose restart    # Restart services
 ```
 
 ### API Endpoints
@@ -269,10 +269,10 @@ docker-compose restart    # Restart services
 **Central server not accessible:**
 ```bash
 # Check services
-sudo docker-compose ps
+sudo docker compose ps
 
 # Check logs
-sudo docker-compose logs orchestrator-service
+sudo docker compose logs orchestrator-service
 
 # Check firewall
 sudo ufw status
@@ -281,7 +281,7 @@ sudo ufw status
 **Node not connecting:**
 ```bash
 # Check node logs
-sudo docker-compose logs hysteria-agent
+sudo docker compose logs hysteria-agent
 
 # Verify master server connectivity
 telnet your-central-server.com 50052
@@ -296,7 +296,7 @@ timedatectl status
 sudo certbot renew
 
 # Restart web service
-sudo docker-compose restart web-service
+sudo docker compose restart web-service
 ```
 
 ### Performance Tuning

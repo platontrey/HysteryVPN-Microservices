@@ -89,8 +89,8 @@ install_docker() {
     systemctl start docker
 
     # Install Docker Compose
-    curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
+    curl -L "https://github.com/docker/compose/releases/download/v2.29.1/docker compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker compose
+    chmod +x /usr/local/bin/docker compose
 
     log "Docker and Docker Compose installed"
 }
@@ -203,7 +203,7 @@ $INSTALL_DIR/logs/*.log {
     notifempty
     create 0644 root root
     postrotate
-        docker-compose -f $INSTALL_DIR/docker-compose.yml logs -f --tail=0 > /dev/null 2>&1 || true
+        docker compose -f $INSTALL_DIR/docker compose.yml logs -f --tail=0 > /dev/null 2>&1 || true
     endscript
 }
 EOF
@@ -217,7 +217,7 @@ echo "Uptime: $(uptime -p)"
 echo "Load: $(uptime | awk -F'load average:' '{ print $2 }')"
 echo ""
 echo "=== Docker Services ==="
-docker-compose -f '"$INSTALL_DIR"'/docker-compose.yml ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+docker compose -f '"$INSTALL_DIR"'/docker compose.yml ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 echo ""
 echo "=== System Resources ==="
 echo "CPU: $(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1"%"}')"
@@ -254,7 +254,7 @@ mkdir -p "\$BACKUP_DIR"
 echo "Creating backup: \$BACKUP_FILE"
 
 # Stop services temporarily for clean backup
-docker-compose -f "$INSTALL_DIR/docker-compose.yml" stop
+docker compose -f "$INSTALL_DIR/docker compose.yml" stop
 
 # Create database backup
 docker exec hysteria2-postgres pg_dump -U hysteria2 hysteria2_db > "\$BACKUP_DIR/db_backup_\$TIMESTAMP.sql"
@@ -267,7 +267,7 @@ tar -czf "\$BACKUP_FILE" -C "$INSTALL_DIR" \\
     .
 
 # Start services again
-docker-compose -f "$INSTALL_DIR/docker-compose.yml" start
+docker compose -f "$INSTALL_DIR/docker compose.yml" start
 
 echo "Backup completed: \$BACKUP_FILE"
 echo "Database backup: \$BACKUP_DIR/db_backup_\$TIMESTAMP.sql"
@@ -306,8 +306,8 @@ generate_config() {
     DB_PASSWORD=$(openssl rand -hex 16)
     NODE_AUTH_TOKEN=$(openssl rand -hex 32)
 
-    # Create docker-compose.yml for central services only
-    cat > "$INSTALL_DIR/docker-compose.yml" << EOF
+    # Create docker compose.yml for central services only
+    cat > "$INSTALL_DIR/docker compose.yml" << EOF
 version: '3.8'
 
 services:
@@ -526,7 +526,7 @@ setup_ssl() {
         cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" "$INSTALL_DIR/ssl/key.pem"
 
         # Setup auto-renewal
-        (crontab -l ; echo "0 12 * * * /usr/bin/certbot renew --quiet && cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem $INSTALL_DIR/ssl/cert.pem && cp /etc/letsencrypt/live/$DOMAIN/privkey.pem $INSTALL_DIR/ssl/key.pem && docker-compose -f $INSTALL_DIR/docker-compose.yml restart web-service") | crontab -
+        (crontab -l ; echo "0 12 * * * /usr/bin/certbot renew --quiet && cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem $INSTALL_DIR/ssl/cert.pem && cp /etc/letsencrypt/live/$DOMAIN/privkey.pem $INSTALL_DIR/ssl/key.pem && docker compose -f $INSTALL_DIR/docker compose.yml restart web-service") | crontab -
 
         log "SSL certificates configured"
     else
@@ -540,13 +540,13 @@ start_services() {
     log "Starting central services..."
 
     cd "$INSTALL_DIR"
-    docker-compose up -d
+    docker compose up -d
 
     log "Waiting for services to be healthy..."
     sleep 30
 
     # Check health
-    if docker-compose ps | grep -q "Up"; then
+    if docker compose ps | grep -q "Up"; then
         log "Services started successfully"
     else
         error "Failed to start services"

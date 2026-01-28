@@ -126,7 +126,7 @@ chmod +x install-node.sh
         <h3>Команды для диагностики</h3>
         <pre>
 {`# Логи оркестратора
-docker-compose logs -f orchestrator-service
+docker compose logs -f orchestrator-service
 
 # Логи узла
 docker logs -f hysteria-agent-node-id

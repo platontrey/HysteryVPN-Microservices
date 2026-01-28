@@ -40,8 +40,8 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-if ! command -v docker-compose &> /dev/null; then
-    echo -e "${RED}❌ Docker Compose is not installed${NC}"
+if ! docker compose version &> /dev/null; then
+    echo -e "${RED}❌ Docker Compose plugin is not available${NC}"
     exit 1
 fi
 

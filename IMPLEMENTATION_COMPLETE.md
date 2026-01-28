@@ -37,7 +37,7 @@
   - `deployments` - история развертываний
 
 ### 5. Docker конфигурация
-- **Основной**: `deployments/docker/docker-compose.yml`
+- **Основной**: `deployments/docker/docker compose.yml`
 - **Сервисы**: PostgreSQL, Redis, Orchestrator, API, Web, 3 VPS Agent
 - **Прокси**: Nginx для production
 - **Health checks**: для всех сервисов
